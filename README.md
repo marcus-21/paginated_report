@@ -1,4 +1,4 @@
-# Projeto: Gerador de Relatório PDF de Produtos
+# Projeto: Gerador de Relatório PDF
 
 ## Descrição
 Este projeto conecta-se a um banco de dados SQL Server, extrai informações sobre produtos e gera um relatório em PDF com essas informações. O relatório inclui ícones que indicam o status do produto e está formatado com tabelas estilizadas.
