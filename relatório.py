@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import pyodbc
 from reportlab.lib.pagesizes import landscape
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Image
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Image, Spacer
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER
@@ -31,10 +31,10 @@ def format_comments(comments):
     return ''
 
 # Detalhes da conexão
-server = '**.*.**.**,****'  # substitua pelo nome ou IP do seu servidor
+server = '**.*.**.**,****'  # substitua pelo nome ou IP do seu servidor com a porta
 database = 'loja'  # substitua pelo nome do seu banco de dados
-username = '****'  # substitua pelo seu nome de usuário
-password = '*********'  # substitua pela sua senha
+username = '******'  # substitua pelo seu nome de usuário
+password = '******'  # substitua pela sua senha
 
 # String de conexão
 connection_string = f"""
@@ -67,7 +67,6 @@ try:
         FORMAT(terminoPrevisto, 'dd/MM/yyyy') AS 'Término Previsto',
         FORMAT(inicioEfetivo, 'dd/MM/yyyy') AS 'Início Efetivo',
         FORMAT(terminoEfetivo, 'dd/MM/yyyy') AS 'Término Efetivo',
-        --CASE WHEN concluido IS NOT NULL THEN CONCAT(concluido, '%') ELSE '0%' END AS 'Percentual entregue',
         FORMAT(updatedAt, 'dd/MM/yyyy') AS 'Última Atualização',
         (SELECT STRING_AGG(CONCAT('Data: ', FORMAT(createdAt, 'dd/MM/yyyy'), CHAR(10), 'Comentário: ', c.texto), CHAR(10))
         FROM comentario_produtos c WHERE c.produtosId = p.id) AS ultimosComentarios
@@ -94,19 +93,36 @@ try:
 
     # Estilos de parágrafos
     styles = getSampleStyleSheet()
-    style_table_header = ParagraphStyle(name='TableHeader',textColor= 'white',parent=styles['Normal'],valign='middle' , alignment=TA_CENTER, fontSize=11)
-    style_table_data = ParagraphStyle(name='TableData', parent=styles['Normal'], alignment=TA_CENTER, valign='middle' , fontSize=10)
+    style_table_header = ParagraphStyle(name='TableHeader', textColor='white', parent=styles['Normal'], valign='middle', alignment=TA_CENTER, fontSize=11)
+    style_table_data = ParagraphStyle(name='TableData', parent=styles['Normal'], alignment=TA_CENTER, valign='middle', fontSize=10)
 
     # Função para criar o PDF com tamanho personalizado
     def create_pdf(df, filename):
         doc = SimpleDocTemplate(filename, pagesize=(custom_width, custom_height))
         elements = []
 
+        # Adicionar título do relatório com imagem
+        title_style = ParagraphStyle(name='Title', parent=styles['Title'], alignment=TA_CENTER, fontSize=16)
+        title = Paragraph("Relatório", title_style)
+        img = Image('./icon/logo.jpg', width=50, height=50)  # ajustei o tamanho da imagem
+        
+        # Tabela com imagem e título centralizados
+        title_table = Table([[img, title]], colWidths=[30, 100])
+        title_table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE')
+        ]))
+
+        elements.append(title_table)
+        
+        # Adicionar espaço
+        elements.append(Spacer(1, 15))
+
         # Cabeçalho da tabela
         table_data = []
         table_data.append([Paragraph('<b>Ícone</b>', style_table_header),
                            Paragraph('<b>Produto</b>', style_table_header),
-                           Paragraph('<b>TIpo</b>', style_table_header),
+                           Paragraph('<b>Tipo</b>', style_table_header),
                            Paragraph('<b>Status</b>', style_table_header),
                            Paragraph('<b>Responsável</b>', style_table_header),
                            Paragraph('<b>Início Previsto</b>', style_table_header),
@@ -133,7 +149,7 @@ try:
             ])
 
         # Tamanho das colunas
-        col_widths = [42 ,100, 70, 80, 80, 80, 80, 80, 80, 80, 150]
+        col_widths = [42, 100, 70, 80, 80, 80, 80, 80, 80, 80, 150]
 
         # Tabela
         table = Table(table_data, colWidths=col_widths, repeatRows=1)
@@ -144,8 +160,6 @@ try:
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
             ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
             ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
-            
-
         ]))
         elements.append(table)
 
