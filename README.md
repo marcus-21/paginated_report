@@ -12,8 +12,8 @@ Este projeto conecta-se a um banco de dados SQL Server, extrai informações sob
 ### Passos de Instalação
 1. Clone o repositório para o seu ambiente local:
    ```bash
-   git clone <URL_DO_REPOSITORIO>
-   cd <NOME_DO_DIRETORIO>
+   git clone https://github.com/marcus-21/paginated_report.git
+   cd paginated_report
     ```
 
 2. Crie um ambiente virtual e ative-o:
